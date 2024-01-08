@@ -75,6 +75,17 @@ async function run() {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
+    //get one user
+    app.get("/users/:email", verifyToken, async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await userCollection.findOne(query);
+      let user = false;
+      if (result) {
+        user = result.status === "active";
+      }
+      res.send({ user });
+    });
 
     // to check email contains admin email
     app.get("/user/admin/:email", verifyToken, async (req, res) => {
@@ -263,6 +274,15 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = bannerCollection.deleteOne(query);
       res.send(result);
+    });
+
+    // get promoCode from banner DB
+    app.post("/banner/promo-code/:coupon", async (req, res) => {
+      const { coupon } = req.params;
+      const promoCode = await bannerCollection.findOne({ coupon });
+      if (promoCode) {
+        res.json({ rate: promoCode.rate });
+      }
     });
 
     // Send a ping to confirm a successful connection
