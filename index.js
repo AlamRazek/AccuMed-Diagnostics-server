@@ -34,6 +34,9 @@ async function run() {
     const reservationCollection = client
       .db("AccuMedDB")
       .collection("allReservation");
+    const allUpcomingTestCollection = client
+      .db("AccuMedDB")
+      .collection("upcomingTestCollection");
 
     // jwt related api
     // creating jwt token
@@ -243,6 +246,13 @@ async function run() {
       res.send(result);
     });
 
+    // user reservation according to email
+    app.get("/reservation/:email", async (req, res) => {
+      const { email } = req.params;
+      const result = await reservationCollection.find({ email }).toArray();
+      res.send(result);
+    });
+
     // dynamic banner
     // get all banners
     app.get("/banners", async (req, res) => {
@@ -289,9 +299,9 @@ async function run() {
     // stripe payment method
     // payment intent
     app.post("/create-payment-intent", async (req, res) => {
-      const { price } = req.body;
+      const { price } = req?.body;
       const amount = parseInt(price * 100);
-
+      console.log(amount, "inside the intent");
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: "usd",
@@ -300,6 +310,19 @@ async function run() {
       res.send({
         clientSecret: paymentIntent.client_secret,
       });
+    });
+    // payments
+    app.post("/payments", async (req, res) => {
+      const payment = req.body;
+      const result = await allUpcomingTestCollection.insertOne(payment);
+      console.log(result);
+      const query = {
+        _id: {
+          $in: payment.reservationId.map((id) => new ObjectId(id)),
+        },
+      };
+      const deleteReservations = await reservationCollection.deleteMany(query);
+      res.send({ result, deleteReservations });
     });
 
     // Send a ping to confirm a successful connection
