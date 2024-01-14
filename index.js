@@ -311,7 +311,17 @@ async function run() {
         clientSecret: paymentIntent.client_secret,
       });
     });
+
     // payments
+    app.get("/payments/:email", verifyToken, async (req, res) => {
+      if (!req.params.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      const query = { email: req.params.email };
+      const result = await allUpcomingTestCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.post("/payments", async (req, res) => {
       const payment = req.body;
       const result = await allUpcomingTestCollection.insertOne(payment);
