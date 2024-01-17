@@ -37,6 +37,9 @@ async function run() {
     const allUpcomingTestCollection = client
       .db("AccuMedDB")
       .collection("upcomingTestCollection");
+    const allRecommendationSlider = client
+      .db("AccuMedDB")
+      .collection("recommendationSlider");
 
     // jwt related api
     // creating jwt token
@@ -331,6 +334,12 @@ async function run() {
       if (promoCode) {
         res.json({ rate: promoCode.rate });
       }
+    });
+
+    // recommendation slider
+    app.get("/slider", async (req, res) => {
+      const result = await allRecommendationSlider.find().toArray();
+      res.send(result);
     });
 
     // delete an Appointment
