@@ -90,6 +90,30 @@ async function run() {
       }
       res.send({ user });
     });
+    // get user profile
+    app.get("/profile/:email", verifyToken, async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await userCollection.findOne(query);
+      res.send(result);
+    });
+
+    // update user
+    app.patch("/users/update/:email", async (req, res) => {
+      const item = req.body;
+      const { email } = req.params;
+      const filter = { email: email };
+      const updateDoc = {
+        $set: {
+          name: item.name,
+          bloodGroup: item.bloodGroup,
+          districts: item.districts,
+          upazilas: item.upazilas,
+        },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
 
     // to check email contains admin email
     app.get("/user/admin/:email", verifyToken, async (req, res) => {
@@ -207,6 +231,10 @@ async function run() {
       const result = await reservationCollection.find().toArray();
       res.send(result);
     });
+    app.get("/appointment", async (req, res) => {
+      const result = await allUpcomingTestCollection.find().toArray();
+      res.send(result);
+    });
     // add a reservation to DB
     app.post("/reservations", async (req, res) => {
       const reservation = req.body;
@@ -221,9 +249,15 @@ async function run() {
       const result = await reservationCollection.deleteOne(query);
       res.send(result);
     });
+    app.delete("/appointmentResult/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await allUpcomingTestCollection.deleteOne(query);
+      res.send(result);
+    });
 
     // deliver a reservation by submit
-    app.patch("/reservations/:id", async (req, res) => {
+    app.patch("/appointmentResult/:id", async (req, res) => {
       9;
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -232,7 +266,10 @@ async function run() {
           reportStatus: "delivered",
         },
       };
-      const result = await reservationCollection.updateOne(filter, updateDoc);
+      const result = await allUpcomingTestCollection.updateOne(
+        filter,
+        updateDoc
+      );
       res.send(result);
     });
 
@@ -294,6 +331,14 @@ async function run() {
       if (promoCode) {
         res.json({ rate: promoCode.rate });
       }
+    });
+
+    // delete an Appointment
+    app.delete("/appointment/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await allUpcomingTestCollection.deleteOne(query);
+      res.send(result);
     });
 
     // stripe payment method
