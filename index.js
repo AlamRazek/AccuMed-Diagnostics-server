@@ -25,7 +25,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const userCollection = client.db("AccuMedDB").collection("users");
     const testCollection = client.db("AccuMedDB").collection("allTest");
@@ -34,12 +34,16 @@ async function run() {
     const reservationCollection = client
       .db("AccuMedDB")
       .collection("allReservation");
+
     const allUpcomingTestCollection = client
       .db("AccuMedDB")
       .collection("upcomingTestCollection");
+
     const allRecommendationSlider = client
       .db("AccuMedDB")
       .collection("recommendationSlider");
+
+    const allRatingsCollection = client.db("AccuMedDB").collection("ratings");
 
     // jwt related api
     // creating jwt token
@@ -389,11 +393,17 @@ async function run() {
       res.send({ result, deleteReservations });
     });
 
+    // get all the ratings
+    app.get("/ratings", async (req, res) => {
+      const result = await allRatingsCollection.find().toArray();
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    /*   await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    ); */
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
