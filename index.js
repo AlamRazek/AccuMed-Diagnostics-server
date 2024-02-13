@@ -152,7 +152,13 @@ async function run() {
     // get all test
     app.get("/test", async (req, res) => {
       console.log("pagination", req.query);
-      const result = await testCollection.find().toArray();
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+      const result = await testCollection
+        .find()
+        .skip(page * size)
+        .limit(size)
+        .toArray();
       res.send(result);
     });
     // search function by date
