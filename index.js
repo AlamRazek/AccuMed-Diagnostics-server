@@ -356,13 +356,6 @@ async function run() {
       res.send(result);
     });
 
-    // get all the ratings
-    app.get("/ratings", async (req, res) => {
-      const result = await allRatingsCollection.find().toArray();
-      console.log(result);
-      res.send(result);
-    });
-
     // stripe payment method
     // payment intent
     app.post("/create-payment-intent", async (req, res) => {
@@ -402,11 +395,18 @@ async function run() {
       res.send({ result, deleteReservations });
     });
 
+    // get all the ratings
+    app.get("/ratings", async (req, res) => {
+      const result = await allRatingsCollection.find().toArray();
+      console.log(result);
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    /*   await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    ); */
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
